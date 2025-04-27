@@ -1,4 +1,5 @@
 #!/bin/bash -x
+set -eu
 
 # Styling
 TERM=xterm-256color
@@ -42,10 +43,14 @@ function log_message {
     local log_file="script.log"
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     if [[ $log_level = INFO ]]; then
-    	echo "$timestamp ${cyan}[${yellow}${bold}$log_level${reset}${cyan}] ${reset}$message" >> $log_file
+    	echo "$timestamp ${cyan}[${green}${bold}$log_level${reset}${cyan}] ${reset}$message" >> $log_file
     elif [[ $log_level = ERROR ]]; then
     	echo "$timestamp ${cyan}[${red}${bold}$log_level${reset}${cyan}] ${reset}$message" >> $log_file
-    fi
+    elif [[ $log_level = WARNING ]]; then
+    	echo "$timestamp ${cyan}[${yellow}${bold}$log_level${reset}${cyan}] ${reset}$message" >> $log_file
+    elif [[ $log_level = DEBUG ]]; then
+    	echo "$timestamp ${cyan}[${magenta}${bold}$log_level${reset}${cyan}] ${reset}$message" >> $log_file
+     fi
 }
 
 # Set variables and gather information
