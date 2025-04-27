@@ -117,7 +117,7 @@ function cleanUp {
 		done
 		SSH_PID=$( ssh -O check -o ControlPath=$SOURCE_CONTROL_PATH $sourceServer 2>&1 | grep "Master running" | awk '{print $3}' | sed -e 's/pid\=//' -e 's/(//' -e 's/)//' )
 		if ! [[ $SSH_PID ]]; then
-			echo -e "${yellow}${bold}Unable to establish SSH connection to $sourceServer.  Exiting.${reset}"
+			echo -e "${yellow}${bold}Unable to close SSH connection to $sourceServer.  Exiting.${reset}"
 			cleanUp
 		fi
 	fi
@@ -127,7 +127,7 @@ function cleanUp {
 		done
 		DEST_SSH_PID=$( ssh -O check -o ControlPath=$DEST_CONTROL_PATH $destServer 2>&1 | grep "Master running" | awk '{print $3}' | sed -e 's/pid\=//' -e 's/(//' -e 's/)//' )
                 if ! [[ $DEST_SSH_PID ]]; then
-                        echo -e "${yellow}${bold}Unable to establish SSH connection to $destServer.  Exiting.${reset}"
+                        echo -e "${yellow}${bold}Unable to close SSH connection to $destServer.  Exiting.${reset}"
 			cleanUp
                 fi
         fi
