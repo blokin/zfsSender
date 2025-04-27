@@ -108,30 +108,28 @@ function sshCmd {
 }
 
 function cleanUp {
+	sshCloseError=0
         echo -en "\n\n${magenta}${bold}Closing SSH sessions.. "
         SSH_PID=$( ssh -O check -o ControlPath=$SOURCE_CONTROL_PATH $sourceServer 2>&1 | grep "Master running" | awk '{print $3}' | sed -e 's/pid\=//' -e 's/(//' -e 's/)//' )
 	DEST_SSH_PID=$( ssh -O check -o ControlPath=$DEST_CONTROL_PATH $destServer 2>&1 | grep "Master running" | awk '{print $3}' | sed -e 's/pid\=//' -e 's/(//' -e 's/)//' )
 	if [[ $SSH_PID ]]; then
-                for PID in "$SSH_PID"; do
-			ssh -q -O stop -o ControlPath=$SOURCE_CONTROL_PATH $sshUser@$sourceServer
-		done
+		ssh -q -O stop -o ControlPath=$SOURCE_CONTROL_PATH $sshUser@$sourceServer
 		SSH_PID=$( ssh -O check -o ControlPath=$SOURCE_CONTROL_PATH $sourceServer 2>&1 | grep "Master running" | awk '{print $3}' | sed -e 's/pid\=//' -e 's/(//' -e 's/)//' )
-		if ! [[ $SSH_PID ]]; then
-			echo -e "${yellow}${bold}Unable to close SSH connection to $sourceServer.  Exiting.${reset}"
-			cleanUp
+		if [[ $SSH_PID ]]; then
+                        echo -e "${red}${bold}Error!\n\n\t${reset}Unable to close SSH connection to ${cyan}${bold}$sourceServer${reset}!\n"
+			sshCloseError=1
+
 		fi
 	fi
 	if [[ $DEST_SSH_PID ]]; then
-		for PID in "$DEST_SSH_PID"; do
-			ssh -q -O stop -o ControlPath=$SOURCE_CONTROL_PATH $sshUser@$destServer
-		done
+		ssh -q -O stop -o ControlPath=$DEST_CONTROL_PATH $sshUser@$destServer
 		DEST_SSH_PID=$( ssh -O check -o ControlPath=$DEST_CONTROL_PATH $destServer 2>&1 | grep "Master running" | awk '{print $3}' | sed -e 's/pid\=//' -e 's/(//' -e 's/)//' )
-                if ! [[ $DEST_SSH_PID ]]; then
-                        echo -e "${yellow}${bold}Unable to close SSH connection to $destServer.  Exiting.${reset}"
-			cleanUp
+                if [[ $DEST_SSH_PID ]]; then
+                        echo -e "${red}${bold}Error!\n\n\t${reset}Unable to close SSH connection to ${cyan}${bold}$destServer${reset}!\n"
+			sshCloseError=1
                 fi
         fi
-        if [[ $? = 0 ]]; then
+        if [[ $sshCloseError = 0 ]]; then
         	echo -e "${bold}${green}Ok!${reset}"
         fi
 }
